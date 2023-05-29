@@ -20,12 +20,11 @@ export default function Home() {
 
       <VStack>
         <GameBoard />
-        <Box height="20px" />
+        {/* <Box height="20px" /> */}
 
         {/* <InitializeButton /> */}
-        <ResetButton />
 
-        <Box height="20px" />
+        <Box height="5px" />
 
         <VStack>
           <InitializeShipButton />
@@ -35,7 +34,7 @@ export default function Home() {
           </HStack>
         </VStack>
 
-        <Box height="20px" />
+        <Box height="5px" />
 
         <Flex flexDirection="column" alignItems="center">
           <Box mb="2">
@@ -59,6 +58,10 @@ export default function Home() {
           <MoveButton key={index} direction={dir} />
         ))}
         <ShootButton /> */}
+
+        <Box height="5px" />
+        <ResetButton />
+        <Box height="10px" />
       </VStack>
     </Box>
   )
