@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
-import { Box, Flex } from "@chakra-ui/react"
+import { Box, Flex, Text, VStack } from "@chakra-ui/react"
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { useProgram } from "@/contexts/ProgramContext"
 import { AccountInfo, PublicKey } from "@solana/web3.js"
 import { IdlAccounts, Idl } from "@coral-xyz/anchor"
+import { gameDataAccount } from "@/utils/constants"
 import {
   StarIcon,
   ArrowBackIcon,
@@ -15,7 +16,7 @@ import {
 // Not sure if this does anything
 type GameState = IdlAccounts<Idl>["gameDataAccount"]
 
-// Todo
+// Not sure how to implement render "shooting"
 const GameBoard = () => {
   const { publicKey } = useWallet()
   const { connection } = useConnection()
@@ -28,13 +29,11 @@ const GameBoard = () => {
   useEffect(() => {
     if (!program) return
     const fetchBoard = async () => {
-      const [level] = PublicKey.findProgramAddressSync(
-        [Buffer.from("level")],
-        program!.programId
+      const gameState = await program!.account.gameDataAccount.fetch(
+        gameDataAccount
       )
-      const gameState = await program!.account.gameDataAccount.fetch(level)
       console.log(JSON.stringify(gameState, null, 2))
-      console.log(gameState.board)
+      // console.log(gameState.board)
       setState(gameState)
     }
 
@@ -50,19 +49,15 @@ const GameBoard = () => {
       )
       setState(data)
     } catch (error) {
-      console.error("Error decoding account data:", error)
+      console.log("Error decoding account data:", error)
     }
   }
 
   useEffect(() => {
     if (!program) return
-    const [level] = PublicKey.findProgramAddressSync(
-      [Buffer.from("level")],
-      program!.programId
-    )
 
     const subscriptionId = connection.onAccountChange(
-      level,
+      gameDataAccount,
       handleAccountChange
     )
 
@@ -71,6 +66,35 @@ const GameBoard = () => {
       connection.removeAccountChangeListener(subscriptionId)
     }
   }, [program])
+
+  const renderTile = (row: any, colIndex: number, publicKey: PublicKey) => {
+    switch (row[colIndex].state) {
+      case 0:
+        return null
+      case 1:
+        let color =
+          row[colIndex].player == publicKey?.toBase58() ? "red.500" : "black"
+        return (
+          <Box>
+            {row[colIndex].lookDirection === 0 && <ArrowUpIcon color={color} />}
+            {row[colIndex].lookDirection === 1 && (
+              <ArrowForwardIcon color={color} />
+            )}
+            {row[colIndex].lookDirection === 2 && (
+              <ArrowDownIcon color={color} />
+            )}
+            {row[colIndex].lookDirection === 3 && (
+              <ArrowBackIcon color={color} />
+            )}
+            <Text>{Number(row[colIndex].health)}</Text>
+          </Box>
+        )
+      case 2:
+        return <StarIcon />
+      default:
+        return null
+    }
+  }
 
   return (
     <>
@@ -88,49 +112,7 @@ const GameBoard = () => {
                 alignItems="center"
                 justifyContent="center"
               >
-                {row[colIndex].state === 0 ? (
-                  // Render something for state 0
-                  <></>
-                ) : row[colIndex].state === 1 ? (
-                  <Box>
-                    {row[colIndex].lookDirection === 0 ? (
-                      <ArrowUpIcon
-                        color={
-                          row[colIndex].player == publicKey?.toBase58()
-                            ? "red.500"
-                            : "black"
-                        }
-                      />
-                    ) : row[colIndex].lookDirection === 1 ? (
-                      <ArrowForwardIcon
-                        color={
-                          row[colIndex].player == publicKey?.toBase58()
-                            ? "red.500"
-                            : "black"
-                        }
-                      />
-                    ) : row[colIndex].lookDirection === 2 ? (
-                      <ArrowDownIcon
-                        color={
-                          row[colIndex].player == publicKey?.toBase58()
-                            ? "red.500"
-                            : "black"
-                        }
-                      />
-                    ) : (
-                      <ArrowBackIcon
-                        color={
-                          row[colIndex].player == publicKey?.toBase58()
-                            ? "red.500"
-                            : "black"
-                        }
-                      />
-                    )}
-                  </Box>
-                ) : (
-                  // Render something for state 2
-                  <StarIcon />
-                )}
+                {renderTile(row, colIndex, publicKey!)}
               </Box>
             ))}
           </Flex>

@@ -2,8 +2,14 @@ import { useState } from "react"
 import { Button } from "@chakra-ui/react"
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { useProgram } from "@/contexts/ProgramContext"
-import { Keypair, PublicKey } from "@solana/web3.js"
-import { getAssociatedTokenAddressSync } from "@solana/spl-token"
+import { Keypair } from "@solana/web3.js"
+import { useAccounts } from "@/contexts/AccountsContext"
+import {
+  gameDataAccount,
+  chestVault,
+  cannonTokenMint,
+  rumTokenMint,
+} from "@/utils/constants"
 
 const SpawnShipButton = () => {
   const { publicKey, sendTransaction } = useWallet()
@@ -13,42 +19,14 @@ const SpawnShipButton = () => {
   // Program from context
   const { program } = useProgram()
 
+  // Accounts from context
+  const { playerCannonTokenAccount, playerRumTokenAccount, playerShipPDA } =
+    useAccounts()
+
   const handleClick = async () => {
     setIsLoading(true)
 
-    const [level] = PublicKey.findProgramAddressSync(
-      [Buffer.from("level")],
-      program!.programId
-    )
-
-    const [chestVault] = PublicKey.findProgramAddressSync(
-      [Buffer.from("chestVault")],
-      program!.programId
-    )
-
-    const [shipPDA] = PublicKey.findProgramAddressSync(
-      [Buffer.from("ship"), publicKey!.toBuffer()],
-      program!.programId
-    )
-
-    const cannonTokenMint = new PublicKey(
-      "boomkN8rQpbgGAKcWvR3yyVVkjucNYcq7gTav78NQAG"
-    )
-
-    const playerCannonTokenAccount = getAssociatedTokenAddressSync(
-      cannonTokenMint,
-      publicKey!
-    )
-
-    const rumTokenMint = new PublicKey(
-      "rumwqxXmjKAmSdkfkc5qDpHTpETYJRyXY22DWYUmWDt"
-    )
-
-    const playerRumTokenAccount = getAssociatedTokenAddressSync(
-      rumTokenMint,
-      publicKey!
-    )
-
+    // Not sure how this is used
     const avatarPubkey = Keypair.generate()
 
     try {
@@ -57,13 +35,13 @@ const SpawnShipButton = () => {
         .accounts({
           player: publicKey!,
           tokenAccountOwner: publicKey!,
-          gameDataAccount: level,
+          gameDataAccount: gameDataAccount,
           chestVault: chestVault,
-          nftAccount: publicKey!, // used to derive shipPDA
-          ship: shipPDA,
-          cannonTokenAccount: playerCannonTokenAccount,
+          nftAccount: publicKey!, // not sure how this account is used
+          ship: playerShipPDA!,
+          cannonTokenAccount: playerCannonTokenAccount!,
           cannonMint: cannonTokenMint,
-          rumTokenAccount: playerRumTokenAccount,
+          rumTokenAccount: playerRumTokenAccount!,
           rumMint: rumTokenMint,
         })
         .transaction()

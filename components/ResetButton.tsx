@@ -4,6 +4,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { useProgram } from "@/contexts/ProgramContext"
 import { PublicKey } from "@solana/web3.js"
 
+// Reset board for testing, not meant to be used by player
 const ResetButton = () => {
   const { publicKey, sendTransaction } = useWallet()
   const { connection } = useConnection()
@@ -39,7 +40,7 @@ const ResetButton = () => {
 
   return (
     <Button
-      w="150px"
+      w="100px"
       onClick={handleClick}
       isLoading={isLoading}
       isDisabled={!publicKey}

@@ -2,8 +2,15 @@ import { useState } from "react"
 import { Button } from "@chakra-ui/react"
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import { useProgram } from "@/contexts/ProgramContext"
-import { PublicKey } from "@solana/web3.js"
-import { getAssociatedTokenAddressSync } from "@solana/spl-token"
+import { useAccounts } from "@/contexts/AccountsContext"
+import {
+  gameDataAccount,
+  chestVault,
+  gameActions,
+  tokenAccountOwnerPda,
+  goldTokenMint,
+  tokenVault,
+} from "@/utils/constants"
 
 const ShootButton = () => {
   const { publicKey, sendTransaction } = useWallet()
@@ -13,58 +20,24 @@ const ShootButton = () => {
   // Program from context
   const { program } = useProgram()
 
+  // Accounts from context
+  const { playerGoldTokenAccount } = useAccounts()
+
   const handleClick = async () => {
     setIsLoading(true)
-
-    const [level] = PublicKey.findProgramAddressSync(
-      [Buffer.from("level")],
-      program!.programId
-    )
-
-    const [chestVault] = PublicKey.findProgramAddressSync(
-      [Buffer.from("chestVault")],
-      program!.programId
-    )
-
-    const [gameActions] = PublicKey.findProgramAddressSync(
-      [Buffer.from("gameActions")],
-      program!.programId
-    )
-
-    const [tokenAccountOwnerPda] = PublicKey.findProgramAddressSync(
-      [Buffer.from("token_account_owner_pda")],
-      program!.programId
-    )
-
-    const goldTokenMint = new PublicKey(
-      "goLdQwNaZToyavwkbuPJzTt5XPNR3H7WQBGenWtzPH3"
-    )
-
-    const [token_vault] = PublicKey.findProgramAddressSync(
-      [Buffer.from("token_vault"), goldTokenMint.toBuffer()],
-      program!.programId
-    )
-
-    const playerTokenAccount = getAssociatedTokenAddressSync(
-      goldTokenMint,
-      publicKey!
-    )
 
     try {
       const tx = await program!.methods
         .shoot(0)
         .accounts({
           player: publicKey!,
-          gameDataAccount: level,
+          gameDataAccount: gameDataAccount,
           chestVault: chestVault,
           tokenAccountOwner: publicKey!,
-          // systemProgram: anchor.web3.SystemProgram.programId,
           tokenAccountOwnerPda: tokenAccountOwnerPda,
-          vaultTokenAccount: token_vault,
-          playerTokenAccount: playerTokenAccount,
+          vaultTokenAccount: tokenVault,
+          playerTokenAccount: playerGoldTokenAccount!,
           mintOfTokenBeingSent: goldTokenMint,
-          // tokenProgram: TOKEN_PROGRAM_ID,
-          // associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           gameActions: gameActions,
         })
         .transaction()
@@ -79,7 +52,7 @@ const ShootButton = () => {
 
   return (
     <Button
-      w="150px"
+      w="100px"
       onClick={handleClick}
       isLoading={isLoading}
       isDisabled={!publicKey}

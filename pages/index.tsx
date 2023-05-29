@@ -1,16 +1,14 @@
-import { Box, Flex, HStack, Spacer, VStack } from "@chakra-ui/react"
+import { Box, Flex, Spacer, VStack } from "@chakra-ui/react"
 import WalletMultiButton from "@/components/WalletMultiButton"
-import InitializeButton from "@/components/InitializeButton"
-import InitializeShipButton from "@/components/InitializeShipButton"
-import UpgradeShipButton from "@/components/UpgradeShipButton"
 import ResetButton from "@/components/ResetButton"
-import SpawnShipButton from "@/components/SpawnShipButton"
-import MoveButton from "@/components/MoveButton"
-import ShootButton from "@/components/ShootButton"
 import GameBoard from "@/components/GameBoard"
+import ShipActionButtons from "@/components/ShipActionButtons"
+import ShipSetupButtons from "@/components/ShipSetupButtons"
+import { useWallet } from "@solana/wallet-adapter-react"
 
 export default function Home() {
-  const direction = [0, 1, 2, 3]
+  const { publicKey } = useWallet()
+
   return (
     <Box>
       <Flex px={4} py={4}>
@@ -20,48 +18,18 @@ export default function Home() {
 
       <VStack>
         <GameBoard />
-        {/* <Box height="20px" /> */}
-
-        {/* <InitializeButton /> */}
-
-        <Box height="5px" />
-
-        <VStack>
-          <InitializeShipButton />
-          <HStack>
-            <UpgradeShipButton />
-            <SpawnShipButton />
-          </HStack>
-        </VStack>
-
-        <Box height="5px" />
-
-        <Flex flexDirection="column" alignItems="center">
-          <Box mb="2">
-            <MoveButton direction={direction[0]} />
-          </Box>
-          <Flex>
-            <Box mr="2">
-              <MoveButton direction={direction[3]} />
-            </Box>
-            <ShootButton />
-            <Box ml="2">
-              <MoveButton direction={direction[1]} />
-            </Box>
-          </Flex>
-          <Box mt="2">
-            <MoveButton direction={direction[2]} />
-          </Box>
-        </Flex>
-
-        {/* {direction.map((dir, index) => (
-          <MoveButton key={index} direction={dir} />
-        ))}
-        <ShootButton /> */}
-
-        <Box height="5px" />
-        <ResetButton />
-        <Box height="10px" />
+        {publicKey && (
+          <>
+            <Box height="5px" />
+            <ShipActionButtons />
+            <Box height="5px" />
+            <ShipSetupButtons />
+            <Box height="5px" />
+            <ResetButton />
+            {/* <InitializeButton /> */}
+            <Box height="5px" />
+          </>
+        )}
       </VStack>
     </Box>
   )

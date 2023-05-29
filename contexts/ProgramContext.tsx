@@ -1,7 +1,7 @@
 import { useAnchorWallet, useConnection } from "@solana/wallet-adapter-react"
 import { AnchorProvider, Program, setProvider } from "@coral-xyz/anchor"
 import { SevenSeas, IDL } from "../idl/seven_seas"
-import { PublicKey } from "@solana/web3.js"
+import { programId } from "../utils/constants"
 import {
   createContext,
   useCallback,
@@ -37,13 +37,6 @@ export const ProgramProvider = ({
 
   // Anchor program setup
   const setup = useCallback(async () => {
-    const programId = new PublicKey(
-      "2a4NcnkF5zf14JQXHAv39AsRf7jMFj13wKmTL6ZcDQNd"
-    )
-    // const programId = new PublicKey(
-    //   "4JEMY6vDxG387N7wz9Rp8GNd9BkwdHj44M2To61Remc5"
-    // )
-
     /// @ts-ignore
     const provider = new AnchorProvider(connection, wallet, {})
     setProvider(provider)
